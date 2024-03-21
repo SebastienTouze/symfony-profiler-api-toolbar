@@ -894,7 +894,7 @@ const Sfjs = (function () {
   }
 })()
 
-chrome.runtime.onMessage.addListener(async function (request, sender) {
+chrome.runtime.onMessage.addListener(async function(request, sender) {
   const wdtUrl = request.message
   const token = wdtUrl.split('/').slice(-1)
 //   const wdtResponse = await fetch(wdtUrl)
@@ -904,8 +904,20 @@ chrome.runtime.onMessage.addListener(async function (request, sender) {
 
 //   document.body.appendChild(wrapper)
 
-  const previoustoken = document.querySelectorAll("[data-sfurl]")?.[0]?.id.match('sfwdt(.*)')?.[1];
-  Sfjs.loadToolbar(previoustoken, token, wdtUrl);
+  let previoustoken = document.querySelectorAll('[data-sfurl]')?.[0]?.id.match('sfwdt(.*)')?.[1]
+  if (undefined === previoustoken) {
+    //there is currently no debug toolbar so update of it will not work, let's fetch the initial toolbar with token from a basic HTML
+    let pageWithToolbar = await fetch('https://localhost:8000')
+    let pageContent = await pageWithToolbar.text()
+    previoustoken = pageWithToolbar.headers.get('x-debug-token')
+
+    const parser = new DOMParser()
+    let htmlDoc = parser.parseFromString(pageContent, 'text/html')
+    let toolbar = htmlDoc.querySelector('#sfwdt' + previoustoken)
+
+    document.appendChild(toolbar)
+  }
+  Sfjs.loadToolbar(previoustoken, token, wdtUrl)
 })
 
 export { Sfjs }

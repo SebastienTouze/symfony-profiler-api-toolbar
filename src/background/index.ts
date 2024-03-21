@@ -2,7 +2,7 @@ console.info('chrome-ext template-react-ts background script')
 
 const filter: chrome.webRequest.RequestFilter = {
   types: ['xmlhttprequest'],
-  urls: ['https://localhost/*'],
+  urls: ['https://localhost:8000/*'],
 }
 
 chrome.webRequest.onHeadersReceived.addListener(
@@ -13,7 +13,7 @@ chrome.webRequest.onHeadersReceived.addListener(
     if (hasProfiling) {
       const webdebugToolbarUrl = hasProfiling.value?.replace('_profiler', '_wdt')
       if (!webdebugToolbarUrl) return
-    
+
       setTimeout(() => {
           chrome.tabs.sendMessage(details.tabId, { message: webdebugToolbarUrl });
       }, 200);
